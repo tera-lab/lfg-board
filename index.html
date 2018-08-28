@@ -26,15 +26,15 @@
         <thead>
           <tr>
             <th>募集文</th>
-            <th>リーダー</th>
-            <th>メンバー数</th>
+            <th class="has-text-centered">リーダー</th>
+            <th class="has-text-centered">メンバー数</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="lfg in info.lfgList">
-            <td>{{lfg.message}}</td>
-            <td>{{lfg.leader}}</td>
-            <td>{{ lfg.playerCount }}/{{ lfg.isRaid == 0 ? 5 : 30 }}</td>
+            <td>{{ lfg.message }}</td>
+            <td class="has-text-centered">{{ lfg.leader }}</td>
+            <td class="has-text-centered">{{ lfg.playerCount }}/{{ lfg.isRaid == 0 ? 5 : 30 }}</td>
           </tr>
         </tbody>
       </table>

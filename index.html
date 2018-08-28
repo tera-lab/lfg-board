@@ -19,6 +19,7 @@
     <div v-if="!info">Loading</div>
     <div v-else>
       <p class="has-text-right">
+        <span v-if="isOld" class="tag is-danger" title="2分以上データがアップロードされていません">!</span>
         最終更新: {{ info.updated_at.replace(/\s\+0900$/, '') }}
       </p>
 
@@ -46,13 +47,18 @@
       el: '#app',
       data () {
         return {
-          info: null
+          info: null,
+          isOld: false
         }
       },
       mounted () {
         fetch('https://tera-lab.appspot.com/party_match_info', {mode:'cors'})
           .then(res => {return res.json()})
-          .then(res => (this.info = res))
+          .then(res => {
+            this.info = res
+            if (new Date() - new Date(res.updated_at) > 1000 * 60 * 2)
+              this.isOld = true
+          })
       }
     })
   </script>

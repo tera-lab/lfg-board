@@ -16,49 +16,68 @@
       </div>
     </section>
     
-    <div v-if="!info">Loading</div>
-    <div v-else>
-      <p class="has-text-right">
-        <span v-if="isOld" class="tag is-danger" title="2分以上データがアップロードされていません">!</span>
-        最終更新: {{ info.updated_at.replace(/\s\+0900$/, '') }}
-      </p>
+    <p class="has-text-right">
+      最終更新: {{ updated_at | formatDate }}({{ diff | formatDiff }})
+    </p>
 
-      <table class="table is-hoverable is-fullwidth">
-        <thead>
-          <tr>
-            <th>募集文</th>
-            <th class="has-text-centered">リーダー</th>
-            <th class="has-text-centered">メンバー数</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="lfg in info.lfgList">
-            <td>{{ lfg.message }}</td>
-            <td class="has-text-centered">{{ lfg.leader }}</td>
-            <td class="has-text-centered">{{ lfg.playerCount }}/{{ lfg.isRaid == 0 ? 5 : 30 }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table class="table is-hoverable is-fullwidth">
+      <thead>
+        <tr>
+          <th>募集文</th>
+          <th class="has-text-centered">リーダー</th>
+          <th class="has-text-centered">メンバー数</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="lfg in lfgList">
+          <td>{{ lfg.message }}</td>
+          <td class="has-text-centered">{{ lfg.leader }}</td>
+          <td class="has-text-centered">{{ lfg.playerCount }}/{{ lfg.isRaid == 0 ? 5 : 30 }}</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <script>
     const app = new Vue({
       el: '#app',
-      data () {
-        return {
-          info: null,
-          isOld: false
-        }
+      data: {
+        updated_at: '',
+        diff: null,
+        lfgList: []
       },
       mounted () {
         fetch('https://tera-lab.appspot.com/party_match_info', {mode:'cors'})
           .then(res => {return res.json()})
           .then(res => {
-            this.info = res
-            if (new Date() - new Date(res.updated_at) > 1000 * 60 * 2)
-              this.isOld = true
+            Object.assign(this, res)
           })
+          .then(()=>{
+            const self = this
+            setInterval((function calcDiff() {
+              self.diff = Math.floor((new Date() - new Date(self.updated_at)) / 1000)
+              return calcDiff
+            })(), 1000)
+          })
+      },
+      filters: {
+        formatDate: (value) => {
+          return value.replace(/\s\+0900$/, '')
+        },
+        formatDiff: (value) => {
+          const h = value / 3600 | 0
+          const m = value % 3600 / 60 | 0
+          const s = value % 60
+
+          let ret = ''
+          if (h != 0)
+            ret += `${h}時間`
+          if (m != 0)
+            ret += `${m}分`
+          if (s != 0)
+            ret += `${s}秒`
+          return ret + '前'
+        }
       }
     })
   </script>

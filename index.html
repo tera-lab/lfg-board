@@ -18,9 +18,9 @@
     
     <div v-if="!info">Loading</div>
     <div v-else>
-      <div class="notification is-info">
-        Last Update: {{ info.updated_at }}
-      </div>
+      <p class="has-text-right">
+        最終更新: {{ info.updated_at.replace(/\s\+0900$/, '') }}
+      </p>
 
       <table class="table is-hoverable is-fullwidth">
         <thead>

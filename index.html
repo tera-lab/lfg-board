@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JTERA LFG Board by TERA-Lab</title>
+  <script src="https://unpkg.com/vue@latest/dist/vue.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
+</head>
+<body>
+  <div id="app" class="container">
+    <section class="hero">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">JTERA LFG Board by TERA-Lab</h1>
+        </div>
+      </div>
+    </section>
+    
+    <div v-if="!info">Loading</div>
+    <div v-else>
+      <div class="notification is-info">
+        Last Update: {{ info.updated_at }}
+      </div>
+
+      <table class="table is-hoverable is-fullwidth">
+        <thead>
+          <tr>
+            <th>募集文</th>
+            <th>リーダー</th>
+            <th>メンバー数</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="lfg in info.lfgList">
+            <td>{{lfg.message}}</td>
+            <td>{{lfg.leader}}</td>
+            <td>{{ lfg.playerCount }}/{{ lfg.isRaid == 0 ? 5 : 30 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data () {
+        return {
+          info: null
+        }
+      },
+      mounted () {
+        fetch('https://tera-lab.appspot.com/party_match_info', {mode:'cors'})
+          .then(res => {return res.json()})
+          .then(res => (this.info = res))
+      }
+    })
+  </script>
+</body>
+</html>

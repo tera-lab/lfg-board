@@ -68,7 +68,7 @@
         formatDiff: (value) => {
           const h = value / 3600 | 0
           const m = value % 3600 / 60 | 0
-          const s = value % 60
+          const s = value % 60 | 0
 
           let ret = ''
           if (h != 0)

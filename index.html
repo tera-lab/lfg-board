@@ -67,14 +67,7 @@
           list.sort((a, b) => {
             const A = a.message.toLowerCase()
             const B = b.message.toLowerCase()
-
-            if (A > B) {
-              return 1
-            } else if (A < B) {
-              return -1
-            } else {
-              return 0
-            }
+            return A === B ? 0 : A > B ? 1 : -1
           })
           return list
             .filter(lfg => !(lfg.message.includes('ハルキア') && lfg.playerCount == 3))

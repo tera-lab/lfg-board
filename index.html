@@ -18,7 +18,7 @@
     </section>
     
     <p class="has-text-right">
-      最終更新: {{ updated_at | formatDate }}({{ diff | formatDiff }})
+      最終更新: {{ updated_at | formatDate }}({{ formatedDiff }})
     </p>
 
     <table class="table is-hoverable is-fullwidth">
@@ -30,14 +30,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="lfg in lfgList">
+        <tr v-for="lfg in filteredLfgList">
           <td>{{ lfg.message }}</td>
           <td class="has-text-centered">{{ lfg.leader }}</td>
           <td class="has-text-centered">{{ lfg.playerCount }}/{{ lfg.isRaid == 0 ? 5 : 30 }}</td>
         </tr>
       </tbody>
     </table>
-    <article v-if="lfgList.length == 0" class="message">
+    <article v-if="filteredLfgList.length == 0" class="message">
       <div class="message-body">募集がありません</div>
     </article>
   </div>
@@ -51,25 +51,41 @@
         lfgList: []
       },
       mounted () {
+        const self = this
+        setInterval(this.fetchData, 5000)
         this.fetchData()
           .then(()=>{
             setInterval((function calcDiff() {
-              app.diff = (new Date() - new Date(app.updated_at.replace(/-/g, '/'))) / 1000 | 0
+              self.diff = (new Date() - new Date(self.updated_at.replace(/-/g, '/'))) / 1000 | 0
               return calcDiff
-            })(), 1000)
-          })
-          .then(()=>{
-            setInterval(app.fetchData, 5000)
+            })(), 100)
           })
       },
-      filters: {
-        formatDate: (value) => {
-          return value.replace(/\s\+0900$/, '')
+      computed: {
+        filteredLfgList: function() {
+          const list = this.lfgList.slice()
+          list.sort((a, b) => {
+            const A = a.message.toLowerCase()
+            const B = b.message.toLowerCase()
+
+            if (A > B) {
+              return 1
+            } else if (A < B) {
+              return -1
+            } else {
+              return 0
+            }
+          })
+          return list
+            .filter(lfg => !(lfg.message.includes('ハルキア') && lfg.playerCount == 3))
         },
-        formatDiff: (value) => {
-          const h = value / 3600 | 0
-          const m = value % 3600 / 60 | 0
-          const s = value % 60 | 0
+        formatedDiff: function() {
+          if (!this.diff)
+            return 'processing...'
+
+          const h = this.diff / 3600 | 0
+          const m = this.diff % 3600 / 60 | 0
+          const s = this.diff % 60 | 0
 
           let ret = ''
           if (h != 0)
@@ -81,12 +97,17 @@
           return ret + '前'
         }
       },
+      filters: {
+        formatDate: (value) => {
+          return value.replace(/\s\+0900$/, '')
+        }
+      },
       methods: {
         fetchData: () => {
           return fetch('https://tera-lab.appspot.com/party_match_info', { mode: 'cors' })
             .then(res => res.json())
-            .then(res => {
-              Object.assign(app, res)
+            .then(obj => {
+              Object.assign(app, obj)
             })
         }
       }
